@@ -23,6 +23,8 @@ while getopts ":t:r:s:S:" opt; do
     esac
 done
 
+echo "STARTING MYLISA"
+
 . "${TEST_DIR}/../../lib/sh-test-lib"
 
 ! check_root && error_msg "Please run this test as root."
@@ -30,6 +32,9 @@ cd "${TEST_DIR}"
 create_out_dir "${OUTPUT}"
 RESULT_FILE="${OUTPUT}/result.txt"
 export RESULT_FILE
+
+export PATH="$(pwd)/lisa/tools/:$PATH"
+echo "MYPATH=$PATH"
 
 if [ "${SKIP_INSTALL}" = "true" ] || [ "${SKIP_INSTALL}" = "True" ]; then
     info_msg "Dependency and python3 venv installation skipped"
@@ -40,17 +45,17 @@ else
     install_deps "${PKGS}"
     virtualenv --python=python3 .venv
     . .venv/bin/activate
-    pip3 install --quiet matplotlib numpy nose devlib wrapt scipy IPython
+    pip3 install --quiet matplotlib numpy nose devlib wrapt scipy IPython ruamel.yaml pyarrow bart-py
     git clone "${LISA_REPOSITORY}" lisa
     (
     cd lisa
     git checkout "${LISA_REF}"
     )
 fi
+echo "STARTING MYLISASCRIPT"
 # TODO: check if lisa directory exists
 cd lisa
 . init_env
-lisa-update submodules
 python3 "${LISA_SCRIPT}"
 ls
 for FILE in *.csv
